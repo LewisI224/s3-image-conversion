@@ -36,8 +36,8 @@ export default function UploadImage() {
     }
   return (
     <div>
+        <h2>Upload Image</h2>
         <form onSubmit={uploadToS3}>
-            <h2>Upload Image</h2>
             <label htmlFor="file">Choose an image</label>
             <input type="file" id="file" name="file" onChange={handleFileChange} />
             <button type="submit" disabled={!file || uploading}>{uploading ? "Uploading..." : "Upload"}</button>

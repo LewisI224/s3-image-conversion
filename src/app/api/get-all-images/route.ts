@@ -1,7 +1,6 @@
+import { S3Client, ListObjectsCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { randomUUID } from "crypto";
-
+import { IMAGES_FOLDER } from "../../../../constants";
 
 function getEnvs() {
     const S3_REGION = process.env.S3_REGION
@@ -23,25 +22,23 @@ const s3Client = new S3Client({
     }
 })
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
     try {
-        const formData = await request.formData()
-        const file = formData.get("file") as File
-        if (!file) {
-            return NextResponse.json({error: "No file found in form data"}, { status: 400 })
+        const data = await s3Client.send(new ListObjectsCommand({
+            Bucket: env.S3_BUCKET_NAME
+        }))
+        if(data.Contents) {
+            const filter = new RegExp(IMAGES_FOLDER + "[^ ]")
+            const images = data.Contents.filter((element: any) => filter.test(element.Key))
+            return NextResponse.json(images)
+
+        } else {
+            throw new Error("No images found")
         }
-        const fileBuffer = await file.arrayBuffer()
-        const putObjectCommand = new PutObjectCommand({
-            Bucket: env.S3_BUCKET_NAME,
-            Key: randomUUID(),
-            Body: new Uint8Array(fileBuffer),
-            ContentType: file.type
-        })
-        await s3Client.send(putObjectCommand)
-        console.log(file.name)
-        return NextResponse.json({message: "File uploaded successfully"})
+
     } catch (error) {
         console.error(error)
         return NextResponse.json({error: "Internal Server Error"}, { status: 500 })
-    };
+    }
+
 }
