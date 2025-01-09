@@ -7,8 +7,6 @@ export default function Home() {
       <h1>S3 Image Conversion Test App</h1>
       <a href="/upload-image">Upload Image</a>
       <a href="/list-images">See All Images</a>
-      <a>Edit Image</a>
-      <a>Delete Image</a>
     </div>
   );
 }

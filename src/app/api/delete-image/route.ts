@@ -26,19 +26,18 @@ const s3Client = new S3Client({
 export async function POST(request: Request) {
     try {
         const formData = await request.formData()
-        const file = formData.get("file") as File
-        if (!file) {
-            return NextResponse.json({error: "No file found in form data"}, { status: 400 })
+        const key = formData.get("key") as string
+        if (!key) {
+            return NextResponse.json({error: "No key found in form data"}, { status: 400 })
         }
-        const fileBuffer = await file.arrayBuffer()
-        const putObjectCommand = new PutObjectCommand({
+        console.log(key)
+        const tagObjectCommand = new PutObjectCommand({
             Bucket: env.S3_BUCKET_NAME,
-            Key: `images/`+randomUUID(),
-            Body: new Uint8Array(fileBuffer),
-            ContentType: file.type
+            Key: key,
+            Tagging: "deleted"
         })
-        await s3Client.send(putObjectCommand)
-        return NextResponse.json({message: "File uploaded successfully"})
+        await s3Client.send(tagObjectCommand)
+        return NextResponse.json({message: "File tagged successfully"})
     } catch (error) {
         console.error(error)
         return NextResponse.json({error: "Internal Server Error"}, { status: 500 })
